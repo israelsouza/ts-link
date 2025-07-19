@@ -1,18 +1,27 @@
 import { Request, Response } from 'express';
+import { URL } from 'node:url';
 
 class ShortURL {
-    makeValidation(url:string): void{
-        // inicio da string contem http:// ou https://
-        // o www é opcional (github nao tem)
-        // antes da proxima /, deve conter uma forma de .xxx.yy ou .xxx ou algo semelhante
-        // ex: .com.br ; .gov.br ; .org.br ; .edu.br ; .com 
-        // 
+    makeValidation(url:string): boolean{
+        try {
+            const newUrl = new URL(url);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     makeShortLink(req: Request, res: Response){
         const { url } = req.body;
 
         const urlValid = this.makeValidation(url);
+
+        if(!urlValid)
+            return res.status(400).json({
+                success: false,
+                message: "Url enviada é inválida"
+            })
+            
         // ver se o site com a exata URL ja foi gerado um codigo
         // se sim, retornar o codigo
 
