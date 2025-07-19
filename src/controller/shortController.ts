@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { URL } from 'node:url';
+import prisma from '../lib/prisma'
 
 class ShortURL {
     makeValidation(url:string): boolean{
