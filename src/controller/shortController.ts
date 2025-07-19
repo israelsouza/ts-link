@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { URL } from 'node:url';
+import ApiResponse from '../utils/ResponseHelper'
+import { HttpStatus, Messages } from '../utils/enums'
 import prisma from '../lib/prisma'
 
 class ShortURL {
@@ -70,38 +72,32 @@ class ShortURL {
         const { url } = req.body;
 
         if(!url)
-            return res.status(400).json({
-                success: false,
-                message: "Insira a URL para prosseguri"
-            })
+            return res.status(HttpStatus.BAD_REQUEST).json(
+                ApiResponse.error(Messages.URL_REQUIRED)
+            )
 
         const urlWithPrefix = this.verifyPrefix(url)
         const Valid = this.createURL(urlWithPrefix);
 
         if(!Valid.data)
-            return res.status(400).json({
-                success: false,
-                message: "Url enviada é inválida"
-            })
+            return res.status(HttpStatus.BAD_REQUEST).json(
+                ApiResponse.error(Messages.INVALID_URL)
+            )
 
         const has_link = await this.findURL(Valid.data.href)
 
         if(has_link) 
-            return res.status(200).json({
-                success: true,
-                message: "Url enviada já foi cadastrada",
-                data: has_link
-            })
+            return res.status(HttpStatus.SUCCESS).json(
+                ApiResponse.success(Messages.URL_EXISTS, has_link)
+            )
 
         try {
             const code = await this.createShortCode();
             // salvar codigo            
         } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: "Erro interno ao criar o código, tente novamente."
-            })
-            
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                ApiResponse.error(Messages.INTERNAL_SERVER_ERROR)
+            )            
         }
 
     }
