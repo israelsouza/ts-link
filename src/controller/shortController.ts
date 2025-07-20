@@ -5,7 +5,7 @@ import { HttpStatus, Messages } from '../utils/enums'
 import prisma from '../lib/prisma'
 
 class ShortURL {
-    verifyPrefix(url:string): string{
+    static verifyPrefix(url:string): string{
         const prefix = 'http://'
         const prefix2 = 'https://'
 
@@ -14,7 +14,7 @@ class ShortURL {
         return result ? url : `${prefix}${url}`
     }
 
-    createURL(url:string){        
+    static createURL(url:string){        
         try {
             const urlValid = new URL(url);
             return { success: true, data: urlValid};
@@ -23,7 +23,7 @@ class ShortURL {
         }
     }
 
-    async findURL(url:string){
+    static async findURL(url:string){
         return await prisma.link.findFirst({
             where: {
                 original: url
@@ -34,25 +34,26 @@ class ShortURL {
         })
     }
 
-    generateRandomCode(): string{
-        let code: string = ''
-        const temp = new Array(5);
+    static generateRandomCode(): string{        
+        let str: string = ''
+        const temp = Array.from({length: 5});
         const range: number[][] =  [[48,57], [65,90], [97,122]]
         let sorted;
         
         temp.map(()=>{
             sorted =  range[Math.floor(Math.random() * range.length)];
-            code += String.fromCharCode( Math.floor( Math.random() * ( sorted[1] - sorted[0] + 1 ) + sorted[0]) )
+            str += String.fromCharCode( Math.floor( Math.random() * ( sorted[1] - sorted[0] + 1 ) + sorted[0]) )
         })
         
-        return code;
+        return str;
     }
 
-    async createShortCode(){
+    static async createShortCode(){
         try {
-            let link, code;
+            let link;
+            let code;
             do {
-                code = this.generateRandomCode();            
+                code = ShortURL.generateRandomCode();            
                 link = await prisma.link.findFirst({
                     where: {
                         short: code
@@ -68,7 +69,20 @@ class ShortURL {
         }
     }
 
-    async makeShortLink(req: Request, res: Response){
+    static async saveURLs(code:string, url: string): Promise<void>{
+        try {
+            await prisma.link.create({
+                data: {
+                    original: url,
+                    short: code
+                }
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async makeShortLink(req: Request, res: Response){
         const { url } = req.body;
 
         if(!url)
@@ -76,24 +90,30 @@ class ShortURL {
                 ApiResponse.error(Messages.URL_REQUIRED)
             )
 
-        const urlWithPrefix = this.verifyPrefix(url)
-        const Valid = this.createURL(urlWithPrefix);
+        const urlWithPrefix = ShortURL.verifyPrefix(url)
+        const Valid = ShortURL.createURL(urlWithPrefix);
 
         if(!Valid.data)
             return res.status(HttpStatus.BAD_REQUEST).json(
                 ApiResponse.error(Messages.INVALID_URL)
             )
 
-        const has_link = await this.findURL(Valid.data.href)
+        const has_link = await ShortURL.findURL(Valid.data.href)
 
         if(has_link) 
             return res.status(HttpStatus.SUCCESS).json(
-                ApiResponse.success(Messages.URL_EXISTS, has_link)
+                ApiResponse.success(Messages.URL_EXISTS, `${process.env.BASE_URL}/${has_link.short}`)
             )
 
         try {
-            const code = await this.createShortCode();
-            // salvar codigo            
+            const code = await ShortURL.createShortCode();
+            await ShortURL.saveURLs(code, Valid.data.href);
+
+            return res.status(HttpStatus.CREATED).json(
+                ApiResponse.success(Messages.URL_CREATED, {
+                    url: `${process.env.BASE_URL}/${code}`
+                })
+            )
         } catch (error) {
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
                 ApiResponse.error(Messages.INTERNAL_SERVER_ERROR)
@@ -103,4 +123,4 @@ class ShortURL {
     }
 }
 
-export default new ShortURL();
+export default ShortURL;
