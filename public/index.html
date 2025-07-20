@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Link</title>
+</head>
+<body>
+
+    <main>
+        <input type="text" id="link" placeholder="Insira o link aqui">
+        <button type="submit" onclick="submeterLink()">Enviar</button>
+        <div id="resultado"></div>
+    </main>
+    <script>
+        function submeterLink(){
+            const link = document.getElementById('link').value;
+
+            fetch('/short', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({url: link})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    areaResultado.innerHTML = `Link gerado: <a href="${data.data}" target="_blank">${data.data}</a>`;
+                } else {
+                    areaResultado.innerHTML = `Erro: ${data.message}`;
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                areaResultado.innerHTML = 'Ocorreu um erro de comunicação. Tente novamente.';
+            });
+        }
+    </script>
+</body>
+</html>
