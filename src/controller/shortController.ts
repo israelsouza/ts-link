@@ -62,6 +62,32 @@ class ShortURL {
         }
 
     }
+
+    static async getLink(req: Request, res: Response){
+        const { code } = req.params;
+
+        if (!code)
+            return res.status(HttpStatus.BAD_REQUEST).json(
+                ApiResponse.error(Messages.URL_REQUIRED)
+            )
+
+        try {
+            const urlOriginal = await ShortURLModel.findCode(code);
+            
+            if( !urlOriginal )
+                return res.status(HttpStatus.NOT_FOUND).json(
+                    ApiResponse.error(Messages.URL_NOT_FIND)
+                )
+
+            return res.status(HttpStatus.REDIRECT_PERMANENTLY).redirect(urlOriginal.original)
+            
+        } catch (error) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                ApiResponse.error(Messages.INTERNAL_SERVER_ERROR)
+            )
+        }
+
+    }
 }
 
 export default ShortURL;
