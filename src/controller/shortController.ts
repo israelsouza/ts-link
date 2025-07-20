@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { URL } from 'node:url';
 import ApiResponse from '../utils/ResponseHelper'
 import { HttpStatus, Messages } from '../utils/enums'
-import prisma from '../lib/prisma'
+import ShortURLModel from '../model/shortModel';
 
 class ShortURL {
     static verifyPrefix(url:string): string{
@@ -23,65 +23,6 @@ class ShortURL {
         }
     }
 
-    static async findURL(url:string){
-        return await prisma.link.findFirst({
-            where: {
-                original: url
-            },
-            select: {
-                short: true
-            }
-        })
-    }
-
-    static generateRandomCode(): string{        
-        let str: string = ''
-        const temp = Array.from({length: 5});
-        const range: number[][] =  [[48,57], [65,90], [97,122]]
-        let sorted;
-        
-        temp.map(()=>{
-            sorted =  range[Math.floor(Math.random() * range.length)];
-            str += String.fromCharCode( Math.floor( Math.random() * ( sorted[1] - sorted[0] + 1 ) + sorted[0]) )
-        })
-        
-        return str;
-    }
-
-    static async createShortCode(){
-        try {
-            let link;
-            let code;
-            do {
-                code = ShortURL.generateRandomCode();            
-                link = await prisma.link.findFirst({
-                    where: {
-                        short: code
-                    },
-                    select: {
-                        short: true
-                    }
-                })
-            } while (link);
-            return code;
-        } catch (error) {
-            throw error            
-        }
-    }
-
-    static async saveURLs(code:string, url: string): Promise<void>{
-        try {
-            await prisma.link.create({
-                data: {
-                    original: url,
-                    short: code
-                }
-            })
-        } catch (error) {
-            throw error;
-        }
-    }
-
     static async makeShortLink(req: Request, res: Response){
         const { url } = req.body;
 
@@ -98,7 +39,7 @@ class ShortURL {
                 ApiResponse.error(Messages.INVALID_URL)
             )
 
-        const has_link = await ShortURL.findURL(Valid.data.href)
+        const has_link = await ShortURLModel.findURL(Valid.data.href)
 
         if(has_link) 
             return res.status(HttpStatus.SUCCESS).json(
@@ -106,8 +47,8 @@ class ShortURL {
             )
 
         try {
-            const code = await ShortURL.createShortCode();
-            await ShortURL.saveURLs(code, Valid.data.href);
+            const code = await ShortURLModel.createShortCode();
+            await ShortURLModel.saveURLs(code, Valid.data.href);
 
             return res.status(HttpStatus.CREATED).json(
                 ApiResponse.success(Messages.URL_CREATED, {
