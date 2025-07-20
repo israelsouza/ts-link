@@ -1,5 +1,5 @@
 import express from 'express'
-import shortRoute from './routes/shortRoutes.js'
+import shortRoute from './routes/shortRoutes'
 
 const app = express();
 app.use(express.json())
