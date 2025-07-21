@@ -10,13 +10,13 @@
     <main>
         <input type="text" id="link" placeholder="Insira o link aqui">
         <button type="submit" onclick="submeterLink()">Enviar</button>
-        <div id="resultado"></div>
+        <div id="areaResultado"></div>
     </main>
     <script>
         function submeterLink(){
             const link = document.getElementById('link').value;
 
-            fetch('/short', {
+            fetch('/api/short', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
