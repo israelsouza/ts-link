@@ -10,9 +10,9 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.use("/api/short", shortRoute);
 app.get("/:code", ShortURL.getLink);
 
-const PORT: number = 3000;
-app.listen(PORT, () => {
-  console.log(`Server listen in port http://localhost:${PORT}`);
-});
+// const PORT: number = 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server listen in port http://localhost:${PORT}`);
+// });
 
 export default app;
