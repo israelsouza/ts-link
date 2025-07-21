@@ -24,7 +24,9 @@ class ShortURL {
     }
 
     static async makeShortLink(req: Request, res: Response){
+        console.log("POST / Inicio")
         const { url } = req.body;
+        console.log("Pego url inserida: ", url)
 
         if(!url)
             return res.status(HttpStatus.BAD_REQUEST).json(
@@ -38,24 +40,36 @@ class ShortURL {
             return res.status(HttpStatus.BAD_REQUEST).json(
                 ApiResponse.error(Messages.INVALID_URL)
             )
+        
+        console.log("Url valida: ", Valid.data?.href)
 
         const has_link = await ShortURLModel.findURL(Valid.data.href)
 
-        if(has_link) 
+        
+        if(has_link) {
+            console.log("Link já existe, retornando o existente...")
             return res.status(HttpStatus.SUCCESS).json(
                 ApiResponse.success(Messages.URL_EXISTS, `${process.env.BASE_URL}/${has_link.short}`)
             )
+        }
+
+        console.log("Link não existe, criando...")
 
         try {
             const code = await ShortURLModel.createShortCode();
+            console.log("Código criado, salvando...")
             await ShortURLModel.saveURLs(code, Valid.data.href);
-
+            console.log(`${process.env.BASE_URL}/${code}`);
+            
             return res.status(HttpStatus.CREATED).json(
-                ApiResponse.success(Messages.URL_CREATED, {
-                    url: `${process.env.BASE_URL}/${code}`
-                })
+                ApiResponse.success(
+                    Messages.URL_CREATED,
+                    `${process.env.BASE_URL}/${code}` 
+                )
             )
         } catch (error) {
+            console.log("POST / ERROR")
+            console.log(error)
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
                 ApiResponse.error(Messages.INTERNAL_SERVER_ERROR)
             )            
@@ -64,7 +78,9 @@ class ShortURL {
     }
 
     static async getLink(req: Request, res: Response){
+        console.log("GET / Inicio")
         const { code } = req.params;
+        console.log("Pego código inserido na url: ", code) 
 
         if (!code)
             return res.status(HttpStatus.BAD_REQUEST).json(
@@ -78,6 +94,8 @@ class ShortURL {
                 return res.status(HttpStatus.NOT_FOUND).json(
                     ApiResponse.error(Messages.URL_NOT_FIND)
                 )
+
+            console.log("Url encontrada, redirecionando...")
 
             return res.status(HttpStatus.REDIRECT_PERMANENTLY).redirect(urlOriginal.original)
             
