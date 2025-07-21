@@ -1,16 +1,14 @@
-# Dependências
 /node_modules
 
-# Arquivos de Build
 /dist
 
-# Arquivos de Ambiente (NUNCA ENVIAR)
 .env
 .env.*
 !.env.example
 
-# Arquivos de log e banco de dados local do Prisma
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 prisma/dev.db
+
+.vercel
