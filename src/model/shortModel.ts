@@ -53,7 +53,7 @@ class ShortURLModel {
     });
   }
 
-  static async findCode(code: string){
+  static async findCode(code: string) {
     return await prisma.link.findFirst({
       where: {
         short: code,

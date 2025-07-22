@@ -1,11 +1,8 @@
-import express from 'express'
-import ShortURL from '../controller/shortController'
+import express from "express";
+import ShortURL from "../controller/shortController";
 
 const router = express.Router();
 
-router.post('/', ShortURL.makeShortLink )
+router.post("/", ShortURL.makeShortLink);
 
-
-
-
-export default router
+export default router;
