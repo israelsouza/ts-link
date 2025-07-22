@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
+    <meta name="keywords"
+        content="encurtador de link, encurtador de url, link curto, url curta, gerador de link, short link" />
+    <meta name="description"
+        content="Encurte links longos de forma rápida e gratuita. Cole sua URL para gerar um link curto, fácil de compartilhar e memorizar." />
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Short Link</title>
@@ -88,6 +94,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <main>
@@ -96,7 +103,7 @@
         <div id="areaResultado"></div>
     </main>
     <script>
-        function submeterLink(){
+        function submeterLink() {
             const link = document.getElementById('link').value;
 
             fetch('/api/short', {
@@ -104,24 +111,25 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({url: link})
+                body: JSON.stringify({ url: link })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                if (data.message === 'Url enviada já foi cadastrada.') {
-                    areaResultado.innerHTML = `Este link já foi encurtado: <a href="${data.data}" target="_blank">${data.data}</a>`;                    
-                } else if (data.success) {
-                    areaResultado.innerHTML = `Link criado: <a href="${data.data}" target="_blank">${data.data}</a>`;
-                } else {
-                    areaResultado.innerHTML = `Erro: ${data.message}`;
-                }
-            })
-            .catch(error => {
-                console.error('Erro na requisição:', error);
-                areaResultado.innerHTML = 'Ocorreu um erro de comunicação. Tente novamente.';
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.message === 'Url enviada já foi cadastrada.') {
+                        areaResultado.innerHTML = `Este link já foi encurtado: <a href="${data.data}" target="_blank">${data.data}</a>`;
+                    } else if (data.success) {
+                        areaResultado.innerHTML = `Link criado: <a href="${data.data}" target="_blank">${data.data}</a>`;
+                    } else {
+                        areaResultado.innerHTML = `Erro: ${data.message}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                    areaResultado.innerHTML = 'Ocorreu um erro de comunicação. Tente novamente.';
+                });
         }
     </script>
 </body>
+
 </html>
