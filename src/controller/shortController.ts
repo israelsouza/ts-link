@@ -103,8 +103,7 @@ class ShortURL {
       console.log("Url encontrada, redirecionando...");
 
       return res
-        .status(HttpStatus.REDIRECT_PERMANENTLY)
-        .redirect(urlOriginal.original);
+        .redirect(301, urlOriginal.original);
     } catch (error) {
       return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
